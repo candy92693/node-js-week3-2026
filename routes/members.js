@@ -9,14 +9,15 @@ const initialMembers = require('../fixtures/members.json');
 // ───────────────────────────────────────────────────────────
 
 // 1. 複製 initialMembers，不直接改外部陣列
-/* 作答區
-const members = ...;
-*/
+/* 作答區*/
+const members = [...initialMembers];
 
 // 2. 下一個新增會員要使用的 id
-/* 作答區
-let nextId = ...;
-*/
+/* 作答區*/
+const lastMember = members[members.length - 1];
+//用let因為nextId會隨著新增會員而改變
+let nextId = lastMember.id + 1;
+
 
 // 3. 兩個內部 helper 函式
 
