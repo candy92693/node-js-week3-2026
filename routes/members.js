@@ -24,9 +24,22 @@ let nextId = lastMember.id + 1;
 // 函式一：filterByQuery(list, query)：
 // - 依據 query.level 篩選，沒帶就回全部
 // - 任務二的 GET / 會使用到這個函式
-/* 作答區
-function filterByQuery(list, query) { ... }
-*/
+/* 作答區*/
+function filterByQuery(list, query) {
+    //如果沒帶query.level->回傳全部會員list
+    if (!query.level) {
+        return list;
+    }
+    //如果有帶query.level->回傳符合條件的會員list
+    //第二個return: list.filter()=>{return;} -> 會回傳只包含符合條件的元素的新陣列，並return給filter函式
+    //第一個return: return list.filetr((){};) -> 再將filter函式回傳的新陣列回傳給filterByQuery函式
+    //因為箭頭函式只有一行，可以省略 {return}
+    //可寫成: return list.filter((member) => member.level === query.level);
+    //但不可寫成 return list.filter((member) => { member.level === query.level; });
+    //因為有{}就代表這是一個函式區塊，所以不能沒有return，會回傳undefined，導致filter函式回傳空陣列
+    return list.filter((member) => { return member.level === query.level; });
+}
+
 
 // 函式二：validateBody(body)
 // - 驗證 body 有沒有 name、level 欄位，要擋 null / undefined / {}
