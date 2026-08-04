@@ -46,9 +46,21 @@ function filterByQuery(list, query) {
 // - 驗證通過 → { valid: true }
 // - 驗證失敗 → { valid: false, error: '缺 name 或 level' }
 // - 任務三的 POST / 會使用到這個函式
-/* 作答區
-function validateBody(body) { ... }
-*/
+/* 作答區*/
+function validateBody(body) {
+    //檢查 body 是否為 null 或 undefined
+    if (!body) {
+        return { valid: false, error: '缺 name 或 level' };
+    }
+    // 檢查是否缺少 name 或 level 欄位(包含空物件 {} 的情況)
+    if (!body.name || !body.level) {
+        return { valid: false, error: '缺 name 或 level' };
+    }
+    //驗證正確
+    return { valid: true };
+}
+
+
 
 const router = express.Router();
 // 此 router 掛在 app.js 的 '/members'，以下路由皆帶此前綴。舉例來說：
@@ -63,17 +75,35 @@ const router = express.Router();
 // - 輸入：req.query.level 可帶 'VIP' | 'normal'（選填）
 // - 輸出：200 + [{ id, name, level }, ...]
 // - 提示：filterByQuery(members, req.query)
-/* 作答區
-router.METHOD('PATH', (req, res) => { ... });
-*/
+/* 作答區*/
+// get不可大寫，因這是express api的設定
+// Express Router 提供的方法名稱都是小寫，例如：get、post、put、delete
+router.get('/', (req, res) => {
+    const filteredMembers = filterByQuery(members, req.query);
+    return res.status(200).json(filteredMembers);
+});
 
 // GET /:id
 // - 輸入：req.params.id（string，需使用 Number() 轉換）
 // - 輸出：200 + { id, name, level }，或 404 + { error: '會員不存在' }（找不到時）
 // - 提示：members.find，找不到時結果是 undefined
-/* 作答區
-router.METHOD('PATH', (req, res) => { ... });
-*/
+/* 作答區*/
+router.get('/:id', (req, res) => {
+    // Express 的 req.params 來源是 URL，因此所有參數值都是字串（String），
+    // 若需要與數字比較或做數值運算，需先使用 Number() 轉型。
+    const id = Number(req.params.id);
+    //找唯一值，所以find比filter更適合
+    // find找到後立刻停止
+    // callback回傳true或false，true -> find() 立即停止並回傳該元素，false -> find() 繼續尋找下一個元素
+    const member = members.find((member) => member.id === id);
+    //find找不到時會回傳undefined，所以要判斷是否為undefined
+    // if (member === undefined) {} 也可寫成 if (!member) {}
+    if (member === undefined) {
+        return res.status(404).json({ error: '會員不存在' });
+    }
+    //找得到回傳會員資料
+    return res.status(200).json(member);
+});
 
 // ───────────────────────────────────────────────────────────
 // TODO 任務三：POST /
