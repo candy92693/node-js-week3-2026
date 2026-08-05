@@ -114,9 +114,27 @@ router.get('/:id', (req, res) => {
 // - 輸出：201 + 新會員物件（id 自動配），或 400 + { error: '缺 name 或 level' }（驗證失敗）
 // - 提示：validateBody(req.body) 驗證；通過後用 spread 將 req.body 的欄位與 nextId 自動遞增的 id 合為新物件，push 進 members
 // - 範例：POST /members body { name: '阿文', level: 'VIP' } → 201 { id: 5, name: '阿文', level: 'VIP' }
-/* 作答區
-router.METHOD('PATH', (req, res) => { ... });
-*/
+/* 作答區*/
+router.post('/', (req, res) => {
+    //先驗證Body，以防錯誤資料進入members陣列
+    const validationResult = validateBody(req.body);
+    // 驗證結果錯誤，回傳 400 + { error: '缺 name 或 level' }
+    // if (validationResult.valid === false) {}也可以寫成if (!validationResult.valid){}，因validationResult.valid是布林值
+    if (validationResult.valid === false) {
+        return res.status(400).json({ error: '缺 name 或 level' });
+    }
+    // 驗證通過，建立新會員物件，id 使用目前的 nextId
+    const newMember = {
+        ...req.body,
+        id: nextId,
+    };
+    // 將新會員加入 members 陣列
+    members.push(newMember);
+    // 將 nextId 加 1，供下一位新增會員使用(下一次post)
+    nextId++;
+    return res.status(201).json(newMember);
+});
+
 
 // ───────────────────────────────────────────────────────────
 // TODO 任務四：PUT /:id 和 DELETE /:id
@@ -135,8 +153,20 @@ router.METHOD('PATH', (req, res) => { ... });
 // - 輸入：req.params.id（string，需 Number() 轉換）
 // - 輸出：204（無 body），或 404 + { error: '會員不存在' }（找不到時）
 // - 提示：members.findIndex 找索引，-1 回應 404；找到索引則 splice 移除，再設定 status 204 並以 .end() 結束回應（204 不帶 body）
-/* 作答區
-router.METHOD('PATH', (req, res) => { ... });
-*/
+/* 作答區*/
+//put:更新整筆資料
+router.put('/:id', (req, res) => {
+    const id = Number(req.params.id);
+    //找index
+    //member.id代表member物件的id屬性
+    // id是從req.params.id轉換成數字的值
+    //member.id === id -> 找到符合條件的index，找不到回傳-1
+    const index = members.findIndex((member) => member.id === id);
+    if (index === -1) {
+        return res.status(404).json({ error: '會員不存在' });
+    }
+    return res.status(200).json({ ...members[index], ...req.body })
+});
+
 
 module.exports = router;
