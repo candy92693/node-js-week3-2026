@@ -165,7 +165,18 @@ router.put('/:id', (req, res) => {
     if (index === -1) {
         return res.status(404).json({ error: '會員不存在' });
     }
-    return res.status(200).json({ ...members[index], ...req.body })
+    //更新member資料，將req.body資料更新存回要更新的member
+    //members[index]是要更新的會員物件
+    //...members[index]是要更新的會員物件的所有屬性
+    //...req.body是要更新的會員物件的新屬性
+    //如果req.body有與members[index]相同的屬性，會覆蓋掉原本的屬性值
+    // 所以才會把...members[index]放在前面，...req.body放在後面，這樣就可以覆蓋掉原本的屬性值
+    members[index] = {
+        ...members[index],
+        ...req.body,
+    }
+    //回傳單筆更新的會員資料
+    return res.status(200).json(members[index]);
 });
 
 
